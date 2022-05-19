@@ -1,0 +1,6 @@
+Include/
+Lib/
+Scripts/
+lab-timer.py
+main_app_clases.py
+pyvenv.cfg
