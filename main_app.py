@@ -1,6 +1,5 @@
 from tkinter import Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton
-from turtle import position
-from morse import convertir_a_morse
+from morse import convertir_a_morse,velocidad
 from PIL import ImageTk, Image
 
 # la clase 'Aplicacion' hereda de la clase 'Frame' perteneciente a tkinter
@@ -12,8 +11,8 @@ class Aplicacion(Frame):
         super().__init__(master)
         self.master = master
         
-        self.grid_rowconfigure(0,weight=4)
-        self.grid_rowconfigure(1,weight=1)
+        self.grid_rowconfigure((0,1,2,3,4),weight=1)
+        # self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=4)
         self.grid_columnconfigure(1,weight=1)
 
@@ -21,8 +20,9 @@ class Aplicacion(Frame):
         self.config(bg='#D1B295',padx=10)
         self.pack(fill='both', expand=1,anchor='center') 
         # variable donde estará asociada a la imagen para la Rx
-        self.imagen=ImageTk.PhotoImage(Image.open('C:/Users/Santiago/Desktop/Programacion/Python/gui-morse/media/lamp-expanded.png'))
-        
+        self.imagen_nolamp=ImageTk.PhotoImage(Image.open('media/bombilla.jpg'))
+        self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
+
         # ---WIDGETS---
         # cuadros conversores Morse
         self.caja_ent=Text(self,width=60,height=15,font='C')
@@ -52,7 +52,6 @@ class Aplicacion(Frame):
         self.boton_veloc2.pack(anchor='w')
         self.boton_veloc3.pack(anchor='w')
     
-
     def conversion(self):
         # limpia lo que haya quedado en el cuadro texto
         self.caja_sal.delete('1.0','end-1c')
@@ -68,44 +67,65 @@ class Aplicacion(Frame):
 
     def seg_ventana(self):
         # self.master.withdraw() ESTO NO LO USO PORQUE CUANDO VOLVÍA NO PARABA LA EJECUCION
-        win=Toplevel()
+        self.win=Toplevel()
         # win.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0')
-        win.geometry('1100x680+10+10')
-        win.config(bg='black')
-        win.title('Señales visuales')
-        lbl_img = Label(win,image=self.imagen,bg='black')
-        # lbl_img.pack(fill='both',expand=1)
-        lbl_img.grid(row=0,column=1,columnspan=2,padx=10,pady=10)
+        self.win.geometry('1100x680+10+10')
+        self.win.config(bg='black')
+        self.win.title('Señales visuales')
 
-        self.en_curso=False
-        boton_volver=Button(win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=win.destroy)
+        # relacion de aspecto para hacerla medianamente responsive
+        # lbl_img se expande con grid(sticky='nswe')
+        self.win.grid_rowconfigure(0,weight=4)
+        self.win.grid_rowconfigure(1,weight=1)
+        self.win.grid_columnconfigure((0,1),weight=1)
+        
+        self.lbl_img = Label(self.win,image=self.imagen_nolamp,bg='black')
+        self.lbl_img.grid(row=0,column=0,columnspan=2,padx=10,pady=10,sticky='nswe')
+
+        self.codigo = '-.-'
+        self.tiempo = velocidad(60)
+        boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
+        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.espera)
         boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
-        self.boton_comenzar=Button(win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.secuencia)
         self.boton_comenzar.grid(row=1,column=1,ipadx=15,ipady=10)
 
-        win.grid_rowconfigure(0,weight=3)
-        win.grid_rowconfigure(1,weight=1)
-        # win.grid_columnconfigure(0,weight=4)
-        # win.grid_columnconfigure(1,weight=1)
+    def actualizar_img(self):
+        self.lbl_img['image']=self.imagen_lamp
+        
+    
+    def tiempo_muerto(self):
+        self.lbl_img['image']=self.imagen_nolamp
 
-    def secuencia(self):
-        pass
-        if self.en_curso == False:
-            self.en_curso = True
-            self.boton_comenzar['text']='DETENER'
-            # proceso morse
-            # ...
-            # cuando termina reestablecemos el boton
+    # def secuencia(self):
+    #     codigo = '-.-'  #self.caja_sal.get('1.0','end-1c')
+    #     en_curso=True
+    #     # logica de opcion de velocidad
+    #     # ...
+    #     tiempo = velocidad(60)
+    #     while en_curso:
+    #         self.boton_comenzar['text']='DETENER'
+    #         for c in codigo:
+    #             self.win.after(5000,self.actualizar_img)
+    #             self.win.after(int(tiempo[c]),self.tiempo_muerto)
+    #         en_curso=False
+    #     self.boton_comenzar['text']='COMENZAR'
+    #     # interrumpe el proceso
+    #     # ...
+
+    # probar con decorador
+    def espera(self):
+        self.win.after(500,self.secuencia)
+
+
+    def secuencia(self,codigo=str('-.-')):
+        
+        tiempo = velocidad(60)  # tiempo = {'-':1000,'.':300,' ':3000}
+        self.boton_comenzar['text']='DETENER'
+        for c in codigo:
+            codigo=codigo.pop(0)
+            self.win.after(int(tiempo[c]),self.secuencia,codigo)
+            
             self.boton_comenzar['text']='COMENZAR'
-
-        elif self.en_curso == True:
-            # interrumpe el proceso
-            # ...
-            self.en_curso = False
-            # restablecemos el boton
-            self.boton_comenzar['text']='COMENZAR'
-
-
     
 if __name__ == '__main__':
 
@@ -113,7 +133,7 @@ if __name__ == '__main__':
     root.title('Manipulador Morse')
     root.geometry('700x580+0+0')
     root.minsize(700,580)
-    root.maxsize(800,620)
+    root.maxsize(900,720)
     app = Aplicacion(root)
     app.mainloop()
 
