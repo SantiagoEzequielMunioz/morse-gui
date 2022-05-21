@@ -24,7 +24,7 @@ def convertir_a_morse(texto_ingresado):
     return codigo_str
 
 def velocidad(num_grupos):
-    if num_grupos=='60':
-        tiempos = {'-':1,'.':0.3,' ':3}
+    if num_grupos==60:
+        tiempos = {'-':1000,'.':300,' ':3000} #miliseg
         return tiempos
     
