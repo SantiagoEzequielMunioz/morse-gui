@@ -1,5 +1,4 @@
 from tkinter import Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton
-from turtle import position
 from morse import convertir_a_morse
 from PIL import ImageTk, Image
 
