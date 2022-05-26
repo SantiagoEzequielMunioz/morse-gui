@@ -1,6 +1,8 @@
-from tkinter import Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton
+from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton
+from tkinter.font import NORMAL
 from morse import convertir_a_morse,velocidad
 from PIL import ImageTk, Image
+
 
 # la clase 'Aplicacion' hereda de la clase 'Frame' perteneciente a tkinter
 class Aplicacion(Frame):
@@ -19,9 +21,10 @@ class Aplicacion(Frame):
         # config visual
         self.config(bg='#D1B295',padx=10)
         self.pack(fill='both', expand=1,anchor='center') 
-        # variable donde estará asociada a la imagen para la Rx
-        self.imagen_nolamp=ImageTk.PhotoImage(Image.open('media/bombilla.jpg'))
+        self.fondo_negro=ImageTk.PhotoImage(Image.open('media/fondo-negro.png'))
         self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
+        # variable donde estará asociada a la imagen para la Rx
+        
 
         # ---WIDGETS---
         # cuadros conversores Morse
@@ -33,7 +36,7 @@ class Aplicacion(Frame):
         
         # variable cambiante relacionada a la velocidad a recibir
         self.vel=IntVar()
-        # estas son las opciones para que el user elija la velocidad a utilizar en la recepcion Morse
+        # estas son las opciones para que el usuario elija la velocidad a utilizar en la recepcion Morse
         self.lb_vel=LabelFrame(self,text="Velocidad de Recepción",labelanchor='n')        
         self.boton_veloc1=Radiobutton(self.lb_vel,text='Velocidad: 8 grupos',variable=self.vel,value=1)
         self.boton_veloc2=Radiobutton(self.lb_vel,text='Velocidad: 10 grupos',variable=self.vel,value=2)
@@ -66,66 +69,95 @@ class Aplicacion(Frame):
         self.caja_ent.delete('1.0','end-1c')
 
     def seg_ventana(self):
-        # self.master.withdraw() ESTO NO LO USO PORQUE CUANDO VOLVÍA NO PARABA LA EJECUCION
+        
         self.win=Toplevel()
-        # win.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}+0+0')
+        
         self.win.geometry('1100x680+10+10')
         self.win.config(bg='black')
         self.win.title('Señales visuales')
+
+        self.parada=False
+        
 
         # relacion de aspecto para hacerla medianamente responsive
         # lbl_img se expande con grid(sticky='nswe')
         self.win.grid_rowconfigure(0,weight=4)
         self.win.grid_rowconfigure(1,weight=1)
-        self.win.grid_columnconfigure((0,1),weight=1)
+        self.win.grid_columnconfigure((0,1,2),weight=1)
         
-        self.lbl_img = Label(self.win,image=self.imagen_nolamp,bg='black')
-        self.lbl_img.grid(row=0,column=0,columnspan=2,padx=10,pady=10,sticky='nswe')
+        self.lbl_img = Label(self.win,image=self.fondo_negro,bg='black')
+        self.lbl_img.grid(row=0,column=0,columnspan=3,padx=10,pady=10,sticky='nswe')
 
-        self.codigo = '-.-'
         self.tiempo = velocidad(60)
         boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
-        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.espera)
+        self.boton_parada=Button(self.win,text='CONTADOR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=lambda:self.parar)
+        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.cuenta_regresiva)
         boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
-        self.boton_comenzar.grid(row=1,column=1,ipadx=15,ipady=10)
+        self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
+        self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
-    def actualizar_img(self):
-        self.lbl_img['image']=self.imagen_lamp
-        
-    
-    def tiempo_muerto(self):
-        self.lbl_img['image']=self.imagen_nolamp
+    # utilizo variable de control self.parada para que corte con los ciclos after()
+    def parar(self):
+        self.boton_parada['text']='CONTADOR'
+        return (self.parada==True)
 
-    # def secuencia(self):
-    #     codigo = '-.-'  #self.caja_sal.get('1.0','end-1c')
-    #     en_curso=True
-    #     # logica de opcion de velocidad
-    #     # ...
-    #     tiempo = velocidad(60)
-    #     while en_curso:
-    #         self.boton_comenzar['text']='DETENER'
-    #         for c in codigo:
-    #             self.win.after(5000,self.actualizar_img)
-    #             self.win.after(int(tiempo[c]),self.tiempo_muerto)
-    #         en_curso=False
-    #     self.boton_comenzar['text']='COMENZAR'
-    #     # interrumpe el proceso
-    #     # ...
+    # cuenta regresiva ejecutada por el boton comenzar
+    def cuenta_regresiva(self,restante=0):
+        if self.parada:
+            return
+        # self.boton_comenzar.config(state=DISABLED)
+        self.boton_parada['text']='PARAR'
+        self.lbl_img['image']=None
+        contador = 3 + restante
+        if contador <= 0:
+            print('Tiempo finalizado!')
+            self.lbl_img.config(text='YA!',fg='white',width=40)
+            self.after(1000,self.secuencia)
+        else:
+            self.lbl_img.config(text=f'{contador}',fg='white',width=40)
+            restante -= 1
+            self.after(1000,self.cuenta_regresiva,restante)
 
-    # probar con decorador
-    def espera(self):
-        self.win.after(500,self.secuencia)
+    # metodo de separacion entre caracter y caracter (tiempo humano)
+    def espera(self,remain):
+        self.lbl_img['image']=self.fondo_negro
+        self.win.after(500,self.secuencia,remain)
 
 
-    def secuencia(self,codigo=str('-.-')):
-        
-        tiempo = velocidad(60)  # tiempo = {'-':1000,'.':300,' ':3000}
-        self.boton_comenzar['text']='DETENER'
-        for c in codigo:
-            codigo=codigo.pop(0)
-            self.win.after(int(tiempo[c]),self.secuencia,codigo)
-            
-            self.boton_comenzar['text']='COMENZAR'
+    def secuencia(self,remain=0):
+        if self.parada:
+            return
+
+        self.lbl_img['text']=None
+        self.lbl_img['image']=self.fondo_negro
+
+        try:
+            codigo = self.caja_sal.get('1.0','end-2c')
+        except:
+            #cartel advertencia
+            pass
+        print(codigo)
+        print(str(remain),'comienzo')
+        tiempo = velocidad(60)
+        if remain < len(codigo):
+            if (codigo[remain]) == '.':
+                self.lbl_img['image']=self.imagen_lamp
+                remain += 1
+                print(str(remain),'if con punto')
+                self.win.after(300,self.espera,remain)
+            elif (codigo[remain]) == '-':
+                self.lbl_img['image']=self.imagen_lamp
+                remain += 1
+                print(str(remain),'elif con raya')
+                self.win.after(1200,self.espera,remain)
+            # separacion entre palabra y palabra
+            else:
+                # self.lbl_img['image']=self.imagen_lamp
+                remain += 1
+                self.win.after(2000,self.espera,remain)
+                print(str(remain),'tiempo entre palabra y palabra')
+        else:
+            self.boton_comenzar.config(state=NORMAL)
     
 if __name__ == '__main__':
 
@@ -136,4 +168,3 @@ if __name__ == '__main__':
     root.maxsize(900,720)
     app = Aplicacion(root)
     app.mainloop()
-
