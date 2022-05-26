@@ -1,5 +1,4 @@
-from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton
-from tkinter.font import NORMAL
+from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL
 from morse import convertir_a_morse,velocidad
 from PIL import ImageTk, Image
 
@@ -76,7 +75,7 @@ class Aplicacion(Frame):
         self.win.config(bg='black')
         self.win.title('Señales visuales')
 
-        self.parada=False
+        self.ejecutando=False
         
 
         # relacion de aspecto para hacerla medianamente responsive
@@ -90,23 +89,33 @@ class Aplicacion(Frame):
 
         self.tiempo = velocidad(60)
         boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
-        self.boton_parada=Button(self.win,text='CONTADOR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=lambda:self.parar)
-        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.cuenta_regresiva)
+        self.boton_parada=Button(self.win,text='PARAR',width=15,height=1,activebackground='white',bg='grey',fg='white',state=DISABLED,command=self.comenzar)
+        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.comenzar)
         boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
-    # utilizo variable de control self.parada para que corte con los ciclos after()
-    def parar(self):
-        self.boton_parada['text']='CONTADOR'
-        return (self.parada==True)
+    # utilizo variable de control self.ejecutando para que corte con los ciclos after()
+    def comenzar(self):
+        if self.ejecutando:
+            self.ejecutando = False
+            self.boton_comenzar.config(state=NORMAL)
+            self.boton_parada.config(state=DISABLED)
+            self.lbl_img['image']=self.fondo_negro
+            return
+        else:
+            self.ejecutando = True
+            self.boton_comenzar.config(state=DISABLED)
+            self.boton_parada.config(state=NORMAL)
+            print('arranca')
+            self.cuenta_regresiva()
+
 
     # cuenta regresiva ejecutada por el boton comenzar
     def cuenta_regresiva(self,restante=0):
-        if self.parada:
+        if self.ejecutando == False:
+            print('afuera cuenta_regresiva')
             return
-        # self.boton_comenzar.config(state=DISABLED)
-        self.boton_parada['text']='PARAR'
         self.lbl_img['image']=None
         contador = 3 + restante
         if contador <= 0:
@@ -120,17 +129,16 @@ class Aplicacion(Frame):
 
     # metodo de separacion entre caracter y caracter (tiempo humano)
     def espera(self,remain):
+        if self.ejecutando == False:
+            print('afuera espera')
+            return
         self.lbl_img['image']=self.fondo_negro
         self.win.after(500,self.secuencia,remain)
 
 
     def secuencia(self,remain=0):
-        if self.parada:
-            return
-
         self.lbl_img['text']=None
         self.lbl_img['image']=self.fondo_negro
-
         try:
             codigo = self.caja_sal.get('1.0','end-2c')
         except:
@@ -158,6 +166,9 @@ class Aplicacion(Frame):
                 print(str(remain),'tiempo entre palabra y palabra')
         else:
             self.boton_comenzar.config(state=NORMAL)
+            self.boton_parada.config(state=DISABLED)
+            
+            return self.ejecutando == False
     
 if __name__ == '__main__':
 
