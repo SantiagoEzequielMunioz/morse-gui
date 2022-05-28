@@ -75,19 +75,22 @@ class Aplicacion(Frame):
         self.win.config(bg='black')
         self.win.title('Señales visuales')
 
-        self.ejecutando=False
-        
-
         # relacion de aspecto para hacerla medianamente responsive
         # lbl_img se expande con grid(sticky='nswe')
         self.win.grid_rowconfigure(0,weight=4)
         self.win.grid_rowconfigure(1,weight=1)
         self.win.grid_columnconfigure((0,1,2),weight=1)
         
-        self.lbl_img = Label(self.win,image=self.fondo_negro,bg='black')
+        self.lbl_img = Label(self.win,text='',bg='black')
+        
         self.lbl_img.grid(row=0,column=0,columnspan=3,padx=10,pady=10,sticky='nswe')
 
-        self.tiempo = velocidad(60)
+        # creo la variable inicial que tomará la opcion de velocidad
+        self.velocidad=int
+        
+        # variable de control para detener el ejercicio
+        self.ejecutando=False
+
         boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
         self.boton_parada=Button(self.win,text='PARAR',width=15,height=1,activebackground='white',bg='grey',fg='white',state=DISABLED,command=self.comenzar)
         self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.comenzar)
@@ -97,78 +100,94 @@ class Aplicacion(Frame):
 
     # utilizo variable de control self.ejecutando para que corte con los ciclos after()
     def comenzar(self):
-        if self.ejecutando:
+        print (self.lbl_img['image'])
+        if self.vel.get() == None:
+            # cartel advertencia de que no se eligió una velocidad
+            return
+        self.velocidad = self.vel.get()    
+
+        if self.ejecutando: # si esto cumple quiere decir que se ordenó detener el programa
             self.ejecutando = False
             self.boton_comenzar.config(state=NORMAL)
             self.boton_parada.config(state=DISABLED)
             self.lbl_img['image']=self.fondo_negro
             return
         else:
+        # si es la 1ra vez que comienza el ejercicio, self.ejecutando estaría en False por defecto
+        # esto cambia a True y hace refresh sobre los botones, luego comienza la cuenta regresiva -> secuencia
             self.ejecutando = True
             self.boton_comenzar.config(state=DISABLED)
             self.boton_parada.config(state=NORMAL)
-            print('arranca')
             self.cuenta_regresiva()
 
 
     # cuenta regresiva ejecutada por el boton comenzar
     def cuenta_regresiva(self,restante=0):
+        # condicional en caso de que el usuario haya detenido el ejercicio
+        # durante la cuenta regresiva
         if self.ejecutando == False:
-            print('afuera cuenta_regresiva')
             return
-        self.lbl_img['image']=None
         contador = 3 + restante
         if contador <= 0:
-            print('Tiempo finalizado!')
-            self.lbl_img.config(text='YA!',fg='white',width=40)
+            self.lbl_img.config(text='YA!',fg='white',font=('Verdana',100))
             self.after(1000,self.secuencia)
         else:
-            self.lbl_img.config(text=f'{contador}',fg='white',width=40)
+            self.lbl_img.config(text=f'{contador}',fg='white',font=('Verdana',100))
             restante -= 1
             self.after(1000,self.cuenta_regresiva,restante)
 
     # metodo de separacion entre caracter y caracter (tiempo humano)
     def espera(self,remain):
+        # condicional en caso de que el usuario haya detenido el ejercicio
+        # durante la espera
         if self.ejecutando == False:
-            print('afuera espera')
             return
+
+        # espera es la variable donde asigno el value de la key 'espera', 
+        # que corresponde a la velocidad que se eligio en los radiobuttons
+        espera=velocidad(self.vel.get())['espera']
+
         self.lbl_img['image']=self.fondo_negro
-        self.win.after(500,self.secuencia,remain)
+        self.win.after(espera,self.secuencia,remain)
 
 
     def secuencia(self,remain=0):
-        self.lbl_img['text']=None
+        self.lbl_img['text']=''
+        #nos aseguramos que se vuelva negro el fondo en cada loop recursivo
         self.lbl_img['image']=self.fondo_negro
         try:
             codigo = self.caja_sal.get('1.0','end-2c')
         except:
             #cartel advertencia
             pass
-        print(codigo)
-        print(str(remain),'comienzo')
-        tiempo = velocidad(60)
+
+        tiempo = velocidad(self.vel.get())
         if remain < len(codigo):
-            if (codigo[remain]) == '.':
-                self.lbl_img['image']=self.imagen_lamp
+            # verifico char x char si existe en las keys del dict velocidad importado
+            if (codigo[remain]) in tiempo.keys():
+                # if para que si no hay un espacio o una espera, prenda la lampara
+                if codigo[remain] == '-'or codigo[remain] == '.':
+                    self.lbl_img['image']=self.imagen_lamp
+                    print(codigo[remain],remain)
                 remain += 1
-                print(str(remain),'if con punto')
-                self.win.after(300,self.espera,remain)
-            elif (codigo[remain]) == '-':
-                self.lbl_img['image']=self.imagen_lamp
-                remain += 1
-                print(str(remain),'elif con raya')
-                self.win.after(1200,self.espera,remain)
-            # separacion entre palabra y palabra
+                
+                # remain-1 es para que tome desde el index 0 que equivale al 1er char
+                # otra forma era tomar a remain inicial = -1 como defecto de argumento en esta fc
+                self.win.after(tiempo[codigo[remain-1]],self.espera,remain)
             else:
-                # self.lbl_img['image']=self.imagen_lamp
                 remain += 1
                 self.win.after(2000,self.espera,remain)
-                print(str(remain),'tiempo entre palabra y palabra')
+
         else:
             self.boton_comenzar.config(state=NORMAL)
             self.boton_parada.config(state=DISABLED)
+            print (self.lbl_img['image'])
+            self.lbl_img['image']=None
+            print (self.lbl_img['image'])
+            self.ejecutando = False
+            return
             
-            return self.ejecutando == False
+            
     
 if __name__ == '__main__':
 
