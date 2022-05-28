@@ -1,4 +1,4 @@
-from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL
+from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog
 from morse import convertir_a_morse,velocidad
 from PIL import ImageTk, Image
 
@@ -22,8 +22,23 @@ class Aplicacion(Frame):
         self.pack(fill='both', expand=1,anchor='center') 
         self.fondo_negro=ImageTk.PhotoImage(Image.open('media/fondo-negro.png'))
         self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
-        # variable donde estará asociada a la imagen para la Rx
         
+        # Menú
+        filemenu=Menu(barra_menu,tearoff=0)
+        barra_menu.add_cascade(label='Menu',menu=filemenu)
+        filemenu.add_command(label='Abrir',command=self.menu_abrir)
+        filemenu.add_command(label='Convertir a Morse',command=self.conversion)
+        filemenu.add_command(label='Borrar campos',command=self.borrado)
+        filemenu.add_command(label='Cerrar',command=root.destroy)
+        
+        infomenu=Menu(barra_menu,tearoff=0)
+        barra_menu.add_cascade(label='Info',menu=infomenu)
+        infomenu.add_command(label='Manual')
+        infomenu.add_command(label='Código Morse')
+
+        aboutmenu=Menu(barra_menu,tearoff=0)
+        barra_menu.add_cascade(label='Acerca de',menu=aboutmenu)
+        aboutmenu.add_command(label='Acerca de')
 
         # ---WIDGETS---
         # cuadros conversores Morse
@@ -54,6 +69,18 @@ class Aplicacion(Frame):
         self.boton_veloc2.pack(anchor='w')
         self.boton_veloc3.pack(anchor='w')
     
+    # MÉTODOS DE VENTANA PRINCIPAL
+
+    # Funciones del Menú
+    def menu_abrir(self):
+        abierto=filedialog.askopenfile(title='Abrir archivo de texto',
+        initialdir='/',
+        filetypes=(('Archivos de texto (.txt)','*.txt'),)
+        )
+        texto=''.join(abierto.readlines())
+        return self.caja_ent.insert('1.0',texto)
+
+
     def conversion(self):
         # limpia lo que haya quedado en el cuadro texto
         self.caja_sal.delete('1.0','end-1c')
@@ -98,9 +125,8 @@ class Aplicacion(Frame):
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
-    # utilizo variable de control self.ejecutando para que corte con los ciclos after()
+    
     def comenzar(self):
-        print (self.lbl_img['image'])
         if self.vel.get() == None:
             # cartel advertencia de que no se eligió una velocidad
             return
@@ -119,7 +145,6 @@ class Aplicacion(Frame):
             self.boton_comenzar.config(state=DISABLED)
             self.boton_parada.config(state=NORMAL)
             self.cuenta_regresiva()
-
 
     # cuenta regresiva ejecutada por el boton comenzar
     def cuenta_regresiva(self,restante=0):
@@ -149,7 +174,6 @@ class Aplicacion(Frame):
 
         self.lbl_img['image']=self.fondo_negro
         self.win.after(espera,self.secuencia,remain)
-
 
     def secuencia(self,remain=0):
         self.lbl_img['text']=''
@@ -187,12 +211,13 @@ class Aplicacion(Frame):
             self.ejecutando = False
             return
             
-            
-    
+               
 if __name__ == '__main__':
 
     root=Tk()
     root.title('Manipulador Morse')
+    barra_menu=Menu(root)
+    root.config(menu=barra_menu)
     root.geometry('700x580+0+0')
     root.minsize(700,580)
     root.maxsize(900,720)

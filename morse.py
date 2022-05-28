@@ -20,7 +20,8 @@ def convertir_a_morse(texto_ingresado):
             codigo_lis.append('#')
     
     for elemento in codigo_lis:
-        codigo_str += (elemento+' ')
+        if elemento != ' ':
+            codigo_str += (elemento+' ')
     return codigo_str
 
 def velocidad(num_grupos):
