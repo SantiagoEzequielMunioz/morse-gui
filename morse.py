@@ -1,12 +1,12 @@
-def convertir_a_morse(texto_ingresado):
-
-    codigo_morse={'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.',
+codigo_morse={'A':'.-','B':'-...','C':'-.-.','D':'-..','E':'.',
     'F':'..-.','G':'--.','H':'....','I':'..','J':'.---','K':'-.-',
     'L':'.-..','M':'--','N':'-.','Ñ':'--.--','O':'---','P':'.--.',
     'Q':'--.-','R':'.-.','S':'...','T':'-','U':'..-','V':'...-',
     'W':'.--','X':'-..-','Y':'-.--','Z':'--..','0':'-----','1':'.----',
     '2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...',
     '8':'---..','9':'----.','.':'.-.-.-',',':'--..--','/':'-..-.',' ':'  ','\n':'\n'}
+
+def convertir_a_morse(texto_ingresado):
 
     codigo_lis=[]
     codigo_str=''
@@ -32,4 +32,13 @@ def velocidad(num_grupos):
     else:
         tiempos = {'-':300,'.':80,' ':600,'espera':200} 
     return tiempos
+
+# este método es para limpiar el dict en 2 listas, que me van a servir para
+# la visualizacion del codigo morse en otra ventana
+def dict_to_list():
     
+    klist=list(codigo_morse.keys()) #lo hago lista
+    klist=klist[0:-2]   # acorto la lista y saco los espacios y cambio de linea
+    vlist=list(codigo_morse.values())
+    vlist=vlist[0:-2]
+    return(klist,vlist)

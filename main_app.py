@@ -1,5 +1,5 @@
 from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog
-from morse import convertir_a_morse,velocidad
+from morse import convertir_a_morse,velocidad,dict_to_list
 from PIL import ImageTk, Image
 
 
@@ -34,7 +34,7 @@ class Aplicacion(Frame):
         infomenu=Menu(barra_menu,tearoff=0)
         barra_menu.add_cascade(label='Info',menu=infomenu)
         infomenu.add_command(label='Manual')
-        infomenu.add_command(label='Código Morse')
+        infomenu.add_command(label='Código Morse',command=self.manualview)
 
         aboutmenu=Menu(barra_menu,tearoff=0)
         barra_menu.add_cascade(label='Acerca de',menu=aboutmenu)
@@ -79,8 +79,37 @@ class Aplicacion(Frame):
         )
         texto=''.join(abierto.readlines())
         return self.caja_ent.insert('1.0',texto)
+    
+    def manualview(self):
 
-
+        winmanual=Toplevel()
+        winmanual.resizable(False,False)
+        # winmanual.config(bg='grey')
+        winmanual.title('Código Morse')
+        var=dict_to_list()
+        # separo las listas para trabajar cada una con un loop diferente
+        letras,morse=var[0],var[1]
+        for index,value in enumerate(letras):
+            if index < 10:
+                Label(winmanual,text=value,font=('Verdana',20),fg='red').grid(row=index,column=0,padx=(15,1),pady=10)
+            elif 10 <= index < 20:
+                Label(winmanual,text=value,font=('Verdana',20),fg='red').grid(row=index-10,column=2,padx=(15,1),pady=10)
+            elif 20 <= index < 30:
+                Label(winmanual,text=value,font=('Verdana',20),fg='red').grid(row=index-20,column=4,padx=(15,1),pady=10)
+            else:
+                Label(winmanual,text=value,font=('Verdana',20),fg='red').grid(row=index-30,column=6,padx=(15,1),pady=10)
+            
+        for index,value in enumerate(morse):
+            if index < 10:
+                Label(winmanual,text=value,font=('Verdana',20)).grid(row=index,column=1,padx=(1,15),pady=10)
+            elif 10 <= index < 20:
+                Label(winmanual,text=value,font=('Verdana',20)).grid(row=index-10,column=3,padx=(1,15),pady=10)
+            elif 20 <= index < 30:
+                Label(winmanual,text=value,font=('Verdana',20)).grid(row=index-20,column=5,padx=(1,15),pady=10)
+            else:
+                Label(winmanual,text=value,font=('Verdana',20)).grid(row=index-30,column=7,padx=(1,15),pady=10)
+        
+            
     def conversion(self):
         # limpia lo que haya quedado en el cuadro texto
         self.caja_sal.delete('1.0','end-1c')
