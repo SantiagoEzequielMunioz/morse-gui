@@ -13,13 +13,15 @@ def convertir_a_morse(texto_ingresado):
 
     text=texto_ingresado.upper()
 
+    # loop que crea una lista a partir de los values del dict (morse)
     for caracter in text:
         if caracter in codigo_morse:
             codigo_lis.append(codigo_morse[caracter])
         else:
-            codigo_lis.append('#')
-    
+            codigo_lis.append('#')  # caso de que ese caracter no exista en codigo_morse
+    # loop para unir la lista en cadena
     for elemento in codigo_lis:
+        # if para que haya un espacio entre caracteres morse, salvo en los espacios
         if elemento != ' ':
             codigo_str += (elemento+' ')
     return codigo_str
@@ -38,7 +40,7 @@ def velocidad(num_grupos):
 def dict_to_list():
     
     klist=list(codigo_morse.keys()) #lo hago lista
-    klist=klist[0:-2]   # acorto la lista y saco los espacios y cambio de linea
+    klist=klist[0:-2]   # acorto la lista y saco los espacios y cambio de linea del final del dict
     vlist=list(codigo_morse.values())
     vlist=vlist[0:-2]
     return(klist,vlist)

@@ -1,4 +1,4 @@
-from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog
+from tkinter import DISABLED, LEFT, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog, messagebox
 from morse import convertir_a_morse,velocidad,dict_to_list
 from PIL import ImageTk, Image
 
@@ -13,7 +13,6 @@ class Aplicacion(Frame):
         self.master = master
         
         self.grid_rowconfigure((0,1,2,3,4),weight=1)
-        # self.grid_rowconfigure(1,weight=1)
         self.grid_columnconfigure(0,weight=4)
         self.grid_columnconfigure(1,weight=1)
 
@@ -23,22 +22,23 @@ class Aplicacion(Frame):
         self.fondo_negro=ImageTk.PhotoImage(Image.open('media/fondo-negro.png'))
         self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
         
-        # Menú
+        # Barra Menú
         filemenu=Menu(barra_menu,tearoff=0)
         barra_menu.add_cascade(label='Menu',menu=filemenu)
         filemenu.add_command(label='Abrir',command=self.menu_abrir)
+        filemenu.add_command(label='Guardar',command=self.menu_guardar)
         filemenu.add_command(label='Convertir a Morse',command=self.conversion)
         filemenu.add_command(label='Borrar campos',command=self.borrado)
         filemenu.add_command(label='Cerrar',command=root.destroy)
         
         infomenu=Menu(barra_menu,tearoff=0)
         barra_menu.add_cascade(label='Info',menu=infomenu)
-        infomenu.add_command(label='Manual')
-        infomenu.add_command(label='Código Morse',command=self.manualview)
+        infomenu.add_command(label='Manual',command=self.instrucciones)
+        infomenu.add_command(label='Código Morse',command=self.codigo_morse)
 
         aboutmenu=Menu(barra_menu,tearoff=0)
         barra_menu.add_cascade(label='Acerca de',menu=aboutmenu)
-        aboutmenu.add_command(label='Acerca de')
+        aboutmenu.add_command(label='Acerca de',command=self.menu_acerca)
 
         # ---WIDGETS---
         # cuadros conversores Morse
@@ -72,24 +72,65 @@ class Aplicacion(Frame):
     # MÉTODOS DE VENTANA PRINCIPAL
 
     # Funciones del Menú
+
+    # Método para abrir un archivo de texto y posicionarlo en la caja de entrada
     def menu_abrir(self):
         abierto=filedialog.askopenfile(title='Abrir archivo de texto',
         initialdir='/',
         filetypes=(('Archivos de texto (.txt)','*.txt'),)
         )
         texto=''.join(abierto.readlines())
+        self.borrado()
         return self.caja_ent.insert('1.0',texto)
-    
-    def manualview(self):
+
+    # Método que guarda el contenido de la caja de salida
+    def menu_guardar(self):
+        contenido=self.caja_sal.get('1.0','end-2c')
+        archivo=filedialog.asksaveasfile(title='Guardar Archivo',filetypes=[('Archivos de texto','*.txt')],defaultextension='.txt')
+
+        if archivo:
+            archivo.write(contenido)
+            archivo.close()
+
+    def menu_acerca(self):
+        win_instrucciones=Toplevel()
+        win_instrucciones.minsize(700,350)
+        win_instrucciones.title('Acerca de...')
+        texto='''
+Sobre mí...
+
+Hola! Me llamo Santiago, tengo 33 años y estudio programación de manera autodidacta. Comenzó 
+como un hobbie, donde le dedicaba tiempo en mis ratos libres despues del trabajo. Empecé con 
+Python hace un año y ahora estoy aprendiendo Django.
+
+Sobre el programa...
+
+Éste programa me llevó bastante tiempo al no disponer de la práctica y conocimientos suficientes
+en programación, pero finalmente pude plasmar mi idea inicial a código. Traté de realizarlo de manera
+eficiente, acotando lo que pudiera pero no llevándolo a un extremo para que no se vuelva demasiado
+complejo y/o inentendible en un primer vistazo.
+La idea nació debido a que pertenezco a las Fuerzas Armadas, orientado en Comunicaciones y 
+habitualmente realizamos ejercitaciones en Morse. 
+Esta app la acoplaré a mi futuro portfolio como mi primer proyecto importante.
+
+Puedes encontrar el repositorio en https://github.com/SantiagoEzequielMunioz/morse-gui
+
+Muchas gracias por tu atención!       
+        '''
+        Label(win_instrucciones,font=('Verdana',10),text=texto,justify='left',relief='groove').pack(expand=True,fill='both')
+
+    def codigo_morse(self):
 
         winmanual=Toplevel()
         winmanual.resizable(False,False)
-        # winmanual.config(bg='grey')
+
         winmanual.title('Código Morse')
+        # var es una tupla con dos listas ([keys],[values])
         var=dict_to_list()
         # separo las listas para trabajar cada una con un loop diferente
         letras,morse=var[0],var[1]
         for index,value in enumerate(letras):
+            # diferencio los rangos del index para que cada 10 valores pase a otra columna
             if index < 10:
                 Label(winmanual,text=value,font=('Verdana',20),fg='red').grid(row=index,column=0,padx=(15,1),pady=10)
             elif 10 <= index < 20:
@@ -108,25 +149,44 @@ class Aplicacion(Frame):
                 Label(winmanual,text=value,font=('Verdana',20)).grid(row=index-20,column=5,padx=(1,15),pady=10)
             else:
                 Label(winmanual,text=value,font=('Verdana',20)).grid(row=index-30,column=7,padx=(1,15),pady=10)
-        
-            
+    
+    def instrucciones(self):
+        win_instrucciones=Toplevel()
+        win_instrucciones.minsize(700,200)
+        win_instrucciones.title('Instrucciones')
+        texto='''
+1) Escriba el texto a traducir en Morse. También puede abrirlo desde la barra de menú. 
+   Recuerde que sólo son válidos los documentos de extensión 'txt'.
+
+2) Una vez ingresado el texto, conviértalo con el botón CONVERTIR o desde la barra de menú.
+
+3) Seleccione la velocidad a transmitir por el programa.
+
+4) Pulse EJERCICIO habiendo cumplido con los pasos anteriores.
+
+5) Pulse el botón COMENZAR, y luego de transcurrida la cuenta regresiva comenzará el ejercicio.
+'''
+        Label(win_instrucciones,font=('Verdana',10),text=texto,justify='left').pack(expand=True,fill='both')
+
+    # Funciones de pantalla general
+    # Método para convertir de texto a morse desde la caja de entrada a la de salida
     def conversion(self):
         # limpia lo que haya quedado en el cuadro texto
         self.caja_sal.delete('1.0','end-1c')
-        try:
-            salida = convertir_a_morse(self.caja_ent.get('1.0','end-1c'))
-        except:
-            print("ALGUN CARACTER FUE NO VÁLIDO")
+        salida = convertir_a_morse(self.caja_ent.get('1.0','end-1c'))
+        if '#' in salida:
+            messagebox.showwarning('Caracteres inválidos','Algún caracter no es válido. Estará señalado con una "#"')
         return self.caja_sal.insert('1.0',salida)
     
+    # Método para borrar el contenido en ambas cajas de texto
     def borrado(self):
         self.caja_sal.delete('1.0','end-1c')
         self.caja_ent.delete('1.0','end-1c')
 
+    # SEGUNDA VENTANA (EJERCICIO)
     def seg_ventana(self):
         
         self.win=Toplevel()
-        
         self.win.geometry('1100x680+10+10')
         self.win.config(bg='black')
         self.win.title('Señales visuales')
@@ -140,11 +200,9 @@ class Aplicacion(Frame):
         self.lbl_img = Label(self.win,text='',bg='black')
         
         self.lbl_img.grid(row=0,column=0,columnspan=3,padx=10,pady=10,sticky='nswe')
-
-        # creo la variable inicial que tomará la opcion de velocidad
-        self.velocidad=int
         
         # variable de control para detener el ejercicio
+        # la uso en los métodos cuenta_regresiva y espera
         self.ejecutando=False
 
         boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
@@ -154,12 +212,16 @@ class Aplicacion(Frame):
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
-    
+    # Método de chequeo inicial una vez que se oprime COMENZAR
     def comenzar(self):
-        if self.vel.get() == None:
-            # cartel advertencia de que no se eligió una velocidad
-            return
-        self.velocidad = self.vel.get()    
+        if self.vel.get() == 0:
+            messagebox.showerror('Manipulador Morse','Antes de comenzar el ejercicio debe seleccionar una velocidad en la ventana anterior.')
+            return self.win.destroy()
+
+        # condicional por si quedó algun caracter invalido para transmitir
+        if '#' in self.caja_sal.get('1.0','end-2c'):
+            messagebox.showerror('Manipulador Morse','Existen caractéres inválidos en el texto a transmitir. Por favor modifique las "#" y vuelva a intentarlo')
+            return self.win.destroy()
 
         if self.ejecutando: # si esto cumple quiere decir que se ordenó detener el programa
             self.ejecutando = False
@@ -175,7 +237,7 @@ class Aplicacion(Frame):
             self.boton_parada.config(state=NORMAL)
             self.cuenta_regresiva()
 
-    # cuenta regresiva ejecutada por el boton comenzar
+    # Método de cuenta regresiva antes de lanzar el ejercicio
     def cuenta_regresiva(self,restante=0):
         # condicional en caso de que el usuario haya detenido el ejercicio
         # durante la cuenta regresiva
@@ -190,7 +252,7 @@ class Aplicacion(Frame):
             restante -= 1
             self.after(1000,self.cuenta_regresiva,restante)
 
-    # metodo de separacion entre caracter y caracter (tiempo humano)
+    # Método de separacion entre caracter y caracter (tiempo humano)
     def espera(self,remain):
         # condicional en caso de que el usuario haya detenido el ejercicio
         # durante la espera
@@ -204,16 +266,15 @@ class Aplicacion(Frame):
         self.lbl_img['image']=self.fondo_negro
         self.win.after(espera,self.secuencia,remain)
 
+    # Secuencia principal, lo + complicado en lógica
+    # toma la velocidad de transmisión para el ejercicio y el código morse en la caja de salida
+    # el argumento remain hace de contador para identar sobre cada char del string morse
     def secuencia(self,remain=0):
         self.lbl_img['text']=''
         #nos aseguramos que se vuelva negro el fondo en cada loop recursivo
         self.lbl_img['image']=self.fondo_negro
-        try:
-            codigo = self.caja_sal.get('1.0','end-2c')
-        except:
-            #cartel advertencia
-            pass
 
+        codigo = self.caja_sal.get('1.0','end-2c')
         tiempo = velocidad(self.vel.get())
         if remain < len(codigo):
             # verifico char x char si existe en las keys del dict velocidad importado
@@ -221,22 +282,15 @@ class Aplicacion(Frame):
                 # if para que si no hay un espacio o una espera, prenda la lampara
                 if codigo[remain] == '-'or codigo[remain] == '.':
                     self.lbl_img['image']=self.imagen_lamp
-                    print(codigo[remain],remain)
                 remain += 1
                 
                 # remain-1 es para que tome desde el index 0 que equivale al 1er char
                 # otra forma era tomar a remain inicial = -1 como defecto de argumento en esta fc
                 self.win.after(tiempo[codigo[remain-1]],self.espera,remain)
-            else:
-                remain += 1
-                self.win.after(2000,self.espera,remain)
-
+        # ya en este punto, remain supera len(codigo) y por eso reestablecemos los botones
         else:
             self.boton_comenzar.config(state=NORMAL)
             self.boton_parada.config(state=DISABLED)
-            print (self.lbl_img['image'])
-            self.lbl_img['image']=None
-            print (self.lbl_img['image'])
             self.ejecutando = False
             return
             
@@ -252,3 +306,5 @@ if __name__ == '__main__':
     root.maxsize(900,720)
     app = Aplicacion(root)
     app.mainloop()
+
+
