@@ -42,11 +42,11 @@ class Aplicacion(Frame):
 
         # ---WIDGETS---
         # cuadros conversores Morse
-        self.caja_ent=Text(self,width=60,height=15,font='C')
+        self.caja_ent=Text(self,width=50,height=15,font='C')
         self.boton_convertir=Button(self,text='CONVERTIR A MORSE',width=20,command=self.conversion)
         self.boton_ejercicio=Button(self,text='EJERCICIO',width=20,command=self.seg_ventana)
         self.boton_borrar=Button(self,text='BORRAR CAMPOS',width=20,command=self.borrado)
-        self.caja_sal=Text(self,width=60,height=15,font='C')
+        self.caja_sal=Text(self,width=50,height=14,font=('C',15))
         
         # variable cambiante relacionada a la velocidad a recibir
         self.vel=IntVar()
@@ -197,8 +197,8 @@ Muchas gracias por tu atención!
         self.win.grid_rowconfigure(1,weight=1)
         self.win.grid_columnconfigure((0,1,2),weight=1)
         
+        # label de la ventana ejercicio que contiene a la imagen
         self.lbl_img = Label(self.win,text='',bg='black')
-        
         self.lbl_img.grid(row=0,column=0,columnspan=3,padx=10,pady=10,sticky='nswe')
         
         # variable de control para detener el ejercicio
@@ -219,7 +219,8 @@ Muchas gracias por tu atención!
             return self.win.destroy()
 
         # condicional por si quedó algun caracter invalido para transmitir
-        if '#' in self.caja_sal.get('1.0','end-2c'):
+        captura=self.caja_sal.get('1.0','end-2c')
+        if '#' in captura: 
             messagebox.showerror('Manipulador Morse','Existen caractéres inválidos en el texto a transmitir. Por favor modifique las "#" y vuelva a intentarlo')
             return self.win.destroy()
 
@@ -227,7 +228,8 @@ Muchas gracias por tu atención!
             self.ejecutando = False
             self.boton_comenzar.config(state=NORMAL)
             self.boton_parada.config(state=DISABLED)
-            self.lbl_img['image']=self.fondo_negro
+            # self.lbl_img['image']=''
+            self.lbl_img.config(image='',text='CANCELADO')
             return
         else:
         # si es la 1ra vez que comienza el ejercicio, self.ejecutando estaría en False por defecto
@@ -292,6 +294,7 @@ Muchas gracias por tu atención!
             self.boton_comenzar.config(state=NORMAL)
             self.boton_parada.config(state=DISABLED)
             self.ejecutando = False
+            self.lbl_img['image']=''
             return
             
                
