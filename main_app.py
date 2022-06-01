@@ -212,91 +212,98 @@ Muchas gracias por tu atención!
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
-    # Método de chequeo inicial una vez que se oprime COMENZAR
-    def comenzar(self):
-        if self.vel.get() == 0:
-            messagebox.showerror('Manipulador Morse','Antes de comenzar el ejercicio debe seleccionar una velocidad en la ventana anterior.')
-            return self.win.destroy()
+    # captura de error general con la secuencia
+    try:
+        # Método de chequeo inicial una vez que se oprime COMENZAR
+        def comenzar(self):
+            if self.vel.get() == 0:
+                messagebox.showerror('Manipulador Morse','Antes de comenzar el ejercicio debe seleccionar una velocidad en la ventana anterior.')
+                return self.win.destroy()
 
-        # condicional por si quedó algun caracter invalido para transmitir
-        captura=self.caja_sal.get('1.0','end-2c')
-        if '#' in captura: 
-            messagebox.showerror('Manipulador Morse','Existen caractéres inválidos en el texto a transmitir. Por favor modifique las "#" y vuelva a intentarlo')
-            return self.win.destroy()
+            # condicional por si quedó algun caracter invalido para transmitir
+            captura=self.caja_sal.get('1.0','end-1c')
+            if '#' in captura: 
+                messagebox.showerror('Manipulador Morse','Existen caractéres inválidos en el texto a transmitir. Por favor modifique las "#" y vuelva a intentarlo.')
+                return self.win.destroy()
 
-        if self.ejecutando: # si esto cumple quiere decir que se ordenó detener el programa
-            self.ejecutando = False
-            self.boton_comenzar.config(state=NORMAL)
-            self.boton_parada.config(state=DISABLED)
-            # self.lbl_img['image']=''
-            self.lbl_img.config(image='',text='CANCELADO')
-            return
-        else:
-        # si es la 1ra vez que comienza el ejercicio, self.ejecutando estaría en False por defecto
-        # esto cambia a True y hace refresh sobre los botones, luego comienza la cuenta regresiva -> secuencia
-            self.ejecutando = True
-            self.boton_comenzar.config(state=DISABLED)
-            self.boton_parada.config(state=NORMAL)
-            self.cuenta_regresiva()
+            if self.ejecutando: # si esto cumple quiere decir que se ordenó detener el programa
+                self.ejecutando = False
+                self.boton_comenzar.config(state=NORMAL)
+                self.boton_parada.config(state=DISABLED)
+                # self.lbl_img['image']=''
+                self.lbl_img.config(image='',text='CANCELADO')
+                return
+            else:
+            # si es la 1ra vez que comienza el ejercicio, self.ejecutando estaría en False por defecto
+            # esto cambia a True y hace refresh sobre los botones, luego comienza la cuenta regresiva -> secuencia
+                self.ejecutando = True
+                self.boton_comenzar.config(state=DISABLED)
+                self.boton_parada.config(state=NORMAL)
+                self.cuenta_regresiva()
 
-    # Método de cuenta regresiva antes de lanzar el ejercicio
-    def cuenta_regresiva(self,restante=0):
-        # condicional en caso de que el usuario haya detenido el ejercicio
-        # durante la cuenta regresiva
-        if self.ejecutando == False:
-            return
-        contador = 3 + restante
-        if contador <= 0:
-            self.lbl_img.config(text='YA!',fg='white',font=('Verdana',100))
-            self.after(1000,self.secuencia)
-        else:
-            self.lbl_img.config(text=f'{contador}',fg='white',font=('Verdana',100))
-            restante -= 1
-            self.after(1000,self.cuenta_regresiva,restante)
+        # Método de cuenta regresiva antes de lanzar el ejercicio
+        def cuenta_regresiva(self,restante=0):
+            # condicional en caso de que el usuario haya detenido el ejercicio
+            # durante la cuenta regresiva
+            if self.ejecutando == False:
+                return
+            contador = 3 + restante
+            if contador <= 0:
+                self.lbl_img.config(text='YA!',fg='white',font=('Verdana',100))
+                self.after(1000,self.secuencia)
+            else:
+                self.lbl_img.config(text=f'{contador}',fg='white',font=('Verdana',100))
+                restante -= 1
+                self.after(1000,self.cuenta_regresiva,restante)
 
-    # Método de separacion entre caracter y caracter (tiempo humano)
-    def espera(self,remain):
-        # condicional en caso de que el usuario haya detenido el ejercicio
-        # durante la espera
-        if self.ejecutando == False:
-            return
+        # Método de separacion entre caracter y caracter (tiempo humano)
+        def espera(self,remain):
+            # condicional en caso de que el usuario haya detenido el ejercicio
+            # durante la espera
+            if self.ejecutando == False:
+                return
 
-        # espera es la variable donde asigno el value de la key 'espera', 
-        # que corresponde a la velocidad que se eligio en los radiobuttons
-        espera=velocidad(self.vel.get())['espera']
+            # espera es la variable donde asigno el value de la key 'espera', 
+            # que corresponde a la velocidad que se eligio en los radiobuttons
+            espera=velocidad(self.vel.get())['espera']
 
-        self.lbl_img['image']=self.fondo_negro
-        self.win.after(espera,self.secuencia,remain)
+            self.lbl_img['image']=self.fondo_negro
+            self.win.after(espera,self.secuencia,remain)
 
-    # Secuencia principal, lo + complicado en lógica
-    # toma la velocidad de transmisión para el ejercicio y el código morse en la caja de salida
-    # el argumento remain hace de contador para identar sobre cada char del string morse
-    def secuencia(self,remain=0):
-        self.lbl_img['text']=''
-        #nos aseguramos que se vuelva negro el fondo en cada loop recursivo
-        self.lbl_img['image']=self.fondo_negro
+        # Secuencia principal, lo + complicado en lógica
+        # toma la velocidad de transmisión para el ejercicio y el código morse en la caja de salida
+        # el argumento remain hace de contador para identar sobre cada char del string morse
+        def secuencia(self,remain=0):
+            self.lbl_img['text']=''
+            #nos aseguramos que se vuelva negro el fondo en cada loop recursivo
+            self.lbl_img['image']=self.fondo_negro
 
-        codigo = self.caja_sal.get('1.0','end-2c')
-        tiempo = velocidad(self.vel.get())
-        if remain < len(codigo):
-            # verifico char x char si existe en las keys del dict velocidad importado
-            if (codigo[remain]) in tiempo.keys():
-                # if para que si no hay un espacio o una espera, prenda la lampara
-                if codigo[remain] == '-'or codigo[remain] == '.':
-                    self.lbl_img['image']=self.imagen_lamp
-                remain += 1
-                
-                # remain-1 es para que tome desde el index 0 que equivale al 1er char
-                # otra forma era tomar a remain inicial = -1 como defecto de argumento en esta fc
-                self.win.after(tiempo[codigo[remain-1]],self.espera,remain)
-        # ya en este punto, remain supera len(codigo) y por eso reestablecemos los botones
-        else:
-            self.boton_comenzar.config(state=NORMAL)
-            self.boton_parada.config(state=DISABLED)
-            self.ejecutando = False
-            self.lbl_img['image']=''
-            return
-            
+            codigo = self.caja_sal.get('1.0','end-1c')
+            tiempo = velocidad(self.vel.get())
+            if remain < len(codigo):
+                # verifico char x char si existe en las keys del dict velocidad importado
+                if (codigo[remain]) in tiempo.keys():
+                    # if para que si no hay un espacio o una espera, prenda la lampara
+                    if codigo[remain] == '-'or codigo[remain] == '.':
+                        self.lbl_img['image']=self.imagen_lamp
+                    remain += 1
+                    
+                    # remain-1 es para que tome desde el index 0 que equivale al 1er char
+                    # otra forma era tomar a remain inicial = -1 como defecto de argumento en esta fc
+                    self.win.after(tiempo[codigo[remain-1]],self.espera,remain)
+                else:
+                    messagebox.showerror('Error',f'El caracter "{codigo[remain]}" no es un caracter morse válido.')
+                    return self.win.destroy()
+            # ya en este punto, remain supera len(codigo) y por eso reestablecemos los botones
+            else:
+                self.boton_comenzar.config(state=NORMAL)
+                self.boton_parada.config(state=DISABLED)
+                self.ejecutando = False
+                self.lbl_img['image']=''
+                return
+    except:
+        messagebox.showerror('Manipulador Morse','Ha ocurrido un error inesperado, revise su código morse y vuelva a intentarlo.')
+
                
 if __name__ == '__main__':
 
