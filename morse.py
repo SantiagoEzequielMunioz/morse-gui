@@ -26,6 +26,7 @@ def convertir_a_morse(texto_ingresado):
             codigo_str += (elemento+' ')
     return codigo_str
 
+# funcion para determinar la velocidad que puede seleccionar el usuario
 def velocidad(num_grupos):
     if num_grupos==1:
         tiempos = {'-':1000,'.':500,' ':1500,'espera':800} #miliseg

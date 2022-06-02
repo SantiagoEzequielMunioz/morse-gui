@@ -1,6 +1,8 @@
 from tkinter import DISABLED, LEFT, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog, messagebox
 from morse import convertir_a_morse,velocidad,dict_to_list
 from PIL import ImageTk, Image
+# import pygame
+
 
 
 # la clase 'Aplicacion' hereda de la clase 'Frame' perteneciente a tkinter
@@ -19,8 +21,7 @@ class Aplicacion(Frame):
         # config visual
         self.config(bg='#D1B295',padx=10)
         self.pack(fill='both', expand=1,anchor='center') 
-        self.fondo_negro=ImageTk.PhotoImage(Image.open('media/fondo-negro.png'))
-        self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
+        
         
         # Barra Menú
         filemenu=Menu(barra_menu,tearoff=0)
@@ -52,9 +53,9 @@ class Aplicacion(Frame):
         self.vel=IntVar()
         # estas son las opciones para que el usuario elija la velocidad a utilizar en la recepcion Morse
         self.lb_vel=LabelFrame(self,text="Velocidad de Recepción",labelanchor='n')        
-        self.boton_veloc1=Radiobutton(self.lb_vel,text='Velocidad: 8 grupos',variable=self.vel,value=1)
-        self.boton_veloc2=Radiobutton(self.lb_vel,text='Velocidad: 10 grupos',variable=self.vel,value=2)
-        self.boton_veloc3=Radiobutton(self.lb_vel,text='Velocidad: 12 grupos',variable=self.vel,value=3)
+        self.boton_veloc1=Radiobutton(self.lb_vel,text='Velocidad: 4 grupos',variable=self.vel,value=1)
+        self.boton_veloc2=Radiobutton(self.lb_vel,text='Velocidad: 6 grupos',variable=self.vel,value=2)
+        self.boton_veloc3=Radiobutton(self.lb_vel,text='Velocidad: 8 grupos',variable=self.vel,value=3)
 
         # ubicaciones de widgets conversores
         self.caja_ent.grid(row=0,column=0,rowspan=4,pady=10,padx=10,sticky='nsew')
@@ -191,6 +192,14 @@ Muchas gracias por tu atención!
         self.win.config(bg='black')
         self.win.title('Señales visuales')
 
+        # carga de imagenes de botones
+        self.fondo_negro=ImageTk.PhotoImage(Image.open('media/fondo-negro.png'))
+        self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
+        self.boton_play=ImageTk.PhotoImage(Image.open('media/play2.png'))
+        self.boton_stop=ImageTk.PhotoImage(Image.open('media/stop2.png'))
+
+        
+
         # relacion de aspecto para hacerla medianamente responsive
         # lbl_img se expande con grid(sticky='nswe')
         self.win.grid_rowconfigure(0,weight=4)
@@ -206,8 +215,8 @@ Muchas gracias por tu atención!
         self.ejecutando=False
 
         boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
-        self.boton_parada=Button(self.win,text='PARAR',width=15,height=1,activebackground='white',bg='grey',fg='white',state=DISABLED,command=self.comenzar)
-        self.boton_comenzar=Button(self.win,text='COMENZAR',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.comenzar)
+        self.boton_parada=Button(self.win,image=self.boton_stop,width=20,height=28,bg='black',fg='black',activebackground='black',border=0,state=DISABLED,command=self.comenzar)
+        self.boton_comenzar=Button(self.win,image=self.boton_play,width=20,height=28,bg='black',fg='black',activebackground='black',border=0,command=self.comenzar)
         boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
@@ -230,7 +239,6 @@ Muchas gracias por tu atención!
                 self.ejecutando = False
                 self.boton_comenzar.config(state=NORMAL)
                 self.boton_parada.config(state=DISABLED)
-                # self.lbl_img['image']=''
                 self.lbl_img.config(image='',text='CANCELADO')
                 return
             else:
@@ -285,6 +293,7 @@ Muchas gracias por tu atención!
                 if (codigo[remain]) in tiempo.keys():
                     # if para que si no hay un espacio o una espera, prenda la lampara
                     if codigo[remain] == '-'or codigo[remain] == '.':
+
                         self.lbl_img['image']=self.imagen_lamp
                     remain += 1
                     
@@ -314,6 +323,7 @@ if __name__ == '__main__':
     root.geometry('700x580+0+0')
     root.minsize(700,580)
     root.maxsize(900,720)
+    # pygame.init()
     app = Aplicacion(root)
     app.mainloop()
 
