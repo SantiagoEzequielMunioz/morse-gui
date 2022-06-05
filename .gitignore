@@ -6,3 +6,12 @@ main_app_clases.py
 contador.py
 pyvenv.cfg
 gui-morse.png
+beep.mp3
+beep100.mp3
+beep300.mp3
+beep500.mp3
+beep700.mp3
+back2.png
+play.png
+stop.png
+bg-morse.jpg

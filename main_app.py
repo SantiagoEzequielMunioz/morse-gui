@@ -1,8 +1,6 @@
-from tkinter import DISABLED, LEFT, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog, messagebox
-from morse import convertir_a_morse,velocidad,dict_to_list
+from tkinter import DISABLED, Button, Frame, Label, Text, Tk, Toplevel, IntVar, LabelFrame, Radiobutton, NORMAL, Menu, filedialog, messagebox
+from morse import convertir_a_morse, velocidad, dict_to_list
 from PIL import ImageTk, Image
-# import pygame
-
 
 
 # la clase 'Aplicacion' hereda de la clase 'Frame' perteneciente a tkinter
@@ -19,9 +17,8 @@ class Aplicacion(Frame):
         self.grid_columnconfigure(1,weight=1)
 
         # config visual
-        self.config(bg='#D1B295',padx=10)
+        self.config(bg='#B0BEC5',padx=10)
         self.pack(fill='both', expand=1,anchor='center') 
-        
         
         # Barra Menú
         filemenu=Menu(barra_menu,tearoff=0)
@@ -95,6 +92,7 @@ class Aplicacion(Frame):
 
     def menu_acerca(self):
         win_instrucciones=Toplevel()
+        win_instrucciones.iconbitmap('media/anclalogo.ico')
         win_instrucciones.minsize(700,350)
         win_instrucciones.title('Acerca de...')
         texto='''
@@ -123,6 +121,7 @@ Muchas gracias por tu atención!
     def codigo_morse(self):
 
         winmanual=Toplevel()
+        winmanual.iconbitmap('media/anclalogo.ico')
         winmanual.resizable(False,False)
 
         winmanual.title('Código Morse')
@@ -154,6 +153,7 @@ Muchas gracias por tu atención!
     def instrucciones(self):
         win_instrucciones=Toplevel()
         win_instrucciones.minsize(700,200)
+        win_instrucciones.iconbitmap('media/anclalogo.ico')
         win_instrucciones.title('Instrucciones')
         texto='''
 1) Escriba el texto a traducir en Morse. También puede abrirlo desde la barra de menú. 
@@ -188,7 +188,8 @@ Muchas gracias por tu atención!
     def seg_ventana(self):
         
         self.win=Toplevel()
-        self.win.geometry('1100x680+10+10')
+        self.win.geometry('1100x700+10+10')
+        self.win.iconbitmap('media/anclalogo.ico')
         self.win.config(bg='black')
         self.win.title('Señales visuales')
 
@@ -197,7 +198,7 @@ Muchas gracias por tu atención!
         self.imagen_lamp=ImageTk.PhotoImage(Image.open('media/lamp-expanded.png'))
         self.boton_play=ImageTk.PhotoImage(Image.open('media/play2.png'))
         self.boton_stop=ImageTk.PhotoImage(Image.open('media/stop2.png'))
-
+        self.boton_back=ImageTk.PhotoImage(Image.open('media/back.png'))
         
 
         # relacion de aspecto para hacerla medianamente responsive
@@ -214,10 +215,10 @@ Muchas gracias por tu atención!
         # la uso en los métodos cuenta_regresiva y espera
         self.ejecutando=False
 
-        boton_volver=Button(self.win,text='VOLVER',width=15,height=1,activebackground='white',bg='grey',fg='white',command=self.win.destroy)
+        self.boton_volver=Button(self.win,image=self.boton_back,width=20,height=28,bg='black',fg='black',activebackground='black',border=0,command=self.win.destroy)
         self.boton_parada=Button(self.win,image=self.boton_stop,width=20,height=28,bg='black',fg='black',activebackground='black',border=0,state=DISABLED,command=self.comenzar)
         self.boton_comenzar=Button(self.win,image=self.boton_play,width=20,height=28,bg='black',fg='black',activebackground='black',border=0,command=self.comenzar)
-        boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
+        self.boton_volver.grid(row=1,column=0,ipadx=15,ipady=10)
         self.boton_parada.grid(row=1,column=1,ipadx=15,ipady=10)
         self.boton_comenzar.grid(row=1,column=2,ipadx=15,ipady=10)
 
@@ -293,7 +294,6 @@ Muchas gracias por tu atención!
                 if (codigo[remain]) in tiempo.keys():
                     # if para que si no hay un espacio o una espera, prenda la lampara
                     if codigo[remain] == '-'or codigo[remain] == '.':
-
                         self.lbl_img['image']=self.imagen_lamp
                     remain += 1
                     
@@ -320,11 +320,13 @@ if __name__ == '__main__':
     root.title('Manipulador Morse')
     barra_menu=Menu(root)
     root.config(menu=barra_menu)
+    root.iconbitmap('media/anclalogo.ico')
     root.geometry('700x580+0+0')
     root.minsize(700,580)
     root.maxsize(900,720)
-    # pygame.init()
     app = Aplicacion(root)
     app.mainloop()
 
-
+'''
+requisitos: Pillow==9.1.1
+'''
